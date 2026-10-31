@@ -19,6 +19,10 @@ stations = [
 def plan_stops(stations, total_miles, mpg, tank_gallons, fuel_now):
     """Plan fuel stops; fill in the five steps from the project's "How it works"."""
     quarter_tank = tank_gallons * 0.25
+    fuel_at_destination = fuel_now - total_miles / mpg
+    if fuel_at_destination >= quarter_tank:
+        return None, fuel_at_destination
+
     usable_fuel = fuel_now - quarter_tank
     miles_before_reserve = usable_fuel * mpg
     reachable_stations = []
@@ -28,7 +32,15 @@ def plan_stops(stations, total_miles, mpg, tank_gallons, fuel_now):
     if not reachable_stations:
         return None
     cheapest_station = min(reachable_stations, key=lambda station: station["price"])
-    return cheapest_station
+    miles_to_destination = total_miles - cheapest_station["mile_marker"]
+    miles_after_fill = (tank_gallons - quarter_tank) * mpg
+    gallons_used = cheapest_station["mile_marker"] / mpg
+    fuel_on_arrival = fuel_now - gallons_used
+    if quarter_tank > fuel_on_arrival:
+        return None
+    if miles_to_destination <= miles_after_fill:
+        return cheapest_station, fuel_on_arrival
+    return None
 
 
 # TODO: Work through these scenarios after implementing plan_stops.
@@ -37,6 +49,7 @@ test_cases = [
     {"label": "full tank", "fuel_now": 12},
     {"label": "half tank", "fuel_now": 6},
     {"label": "nearly empty", "fuel_now": 3},
+    {"label": "below reserve", "fuel_now": 2},
 ]
 
 # Shared example trip inputs for the three scenarios above.
@@ -47,4 +60,23 @@ trip = {
 }
 
 # TODO: For each test case, call plan_stops(...) with stations and trip inputs.
-# TODO: Check the planned fuel level never drops below trip["tank_gallons"] * 0.25.
+for case in test_cases:
+    result = plan_stops(
+        stations,
+        trip["total_miles"],
+        trip["mpg"],
+        trip["tank_gallons"],
+        case["fuel_now"],
+    )
+    if result is None:
+        print(case["label"], "-> no safe one-stop route found")
+        continue
+
+    station, fuel_remaining = result
+    if station is None:
+        print(case["label"], "-> no stop needed; fuel at destination:", fuel_remaining)
+        assert fuel_remaining >= trip["tank_gallons"] * 0.25
+        continue
+
+    print(case["label"], "->", station, fuel_remaining)
+    assert fuel_remaining >= trip["tank_gallons"] * 0.25

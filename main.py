@@ -18,13 +18,17 @@ stations = [
 
 def plan_stops(stations, total_miles, mpg, tank_gallons, fuel_now):
     """Plan fuel stops; fill in the five steps from the project's "How it works"."""
-    # TODO 1: Translate the first "How it works" step into a small calculation.
-    # TODO 2: Translate the second step.
-    # TODO 3: Translate the third step.
-    # TODO 4: Translate the fourth step.
-    # TODO 5: Translate the fifth step.
-    # TODO: Decide together what the function should return.
-    pass
+    quarter_tank = tank_gallons * 0.25
+    usable_fuel = fuel_now - quarter_tank
+    miles_before_reserve = usable_fuel * mpg
+    reachable_stations = []
+    for station in stations:
+        if station["mile_marker"] <= miles_before_reserve:
+            reachable_stations.append(station)
+    if not reachable_stations:
+        return None
+    cheapest_station = min(reachable_stations, key=lambda station: station["price"])
+    return cheapest_station
 
 
 # TODO: Work through these scenarios after implementing plan_stops.

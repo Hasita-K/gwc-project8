@@ -18,6 +18,7 @@ stations = [
 
 def plan_stops(stations, total_miles, mpg, tank_gallons, fuel_now):
     """Plan fuel stops; fill in the five steps from the project's "How it works"."""
+    current_mile = 0
     quarter_tank = tank_gallons * 0.25
     fuel_at_destination = fuel_now - total_miles / mpg
     if fuel_at_destination >= quarter_tank:
@@ -27,7 +28,8 @@ def plan_stops(stations, total_miles, mpg, tank_gallons, fuel_now):
     miles_before_reserve = usable_fuel * mpg
     reachable_stations = []
     for station in stations:
-        if station["mile_marker"] <= miles_before_reserve:
+        distance_to_station = station["mile_marker"] - current_mile
+        if 0 < distance_to_station <= miles_before_reserve:
             reachable_stations.append(station)
     if not reachable_stations:
         return None

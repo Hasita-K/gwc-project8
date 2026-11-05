@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from main import plan_stops, stations
 
 app = FastAPI()
@@ -12,4 +12,6 @@ def get_plan(
     fuel_now: float,
 ):
     result = plan_stops(stations, total_miles, mpg, tank_gallons, fuel_now)
+    if result is None:
+        raise HTTPException(status_code=422, detail="No safe route found")
     return result

@@ -50,58 +50,56 @@ def plan_stops(stations, total_miles, mpg, tank_gallons, fuel_now):
 
     return stops, fuel_now
 
+if __name__ == "__main__":
+    test_cases = [
+        {"label": "full tank", "fuel_now": 12},
+        {"label": "half tank", "fuel_now": 6},
+        {"label": "nearly empty", "fuel_now": 3},
+        {"label": "below reserve", "fuel_now": 2},
+    ]
 
-# TODO: Work through these scenarios after implementing plan_stops.
-# The quarter-tank reserve for each case is tank_gallons * 0.25.
-test_cases = [
-    {"label": "full tank", "fuel_now": 12},
-    {"label": "half tank", "fuel_now": 6},
-    {"label": "nearly empty", "fuel_now": 3},
-    {"label": "below reserve", "fuel_now": 2},
-]
+    # Shared example trip inputs for the three scenarios above.
+    trip = {
+        "total_miles": 236,
+        "mpg": 30,
+        "tank_gallons": 12,
+    }
 
-# Shared example trip inputs for the three scenarios above.
-trip = {
-    "total_miles": 236,
-    "mpg": 30,
-    "tank_gallons": 12,
-}
+    # TODO: For each test case, call plan_stops(...) with stations and trip inputs.
+    for case in test_cases:
+        result = plan_stops(
+            stations,
+            trip["total_miles"],
+            trip["mpg"],
+            trip["tank_gallons"],
+            case["fuel_now"],
+        )
+        if result is None:
+            print(case["label"], "-> no safe route found")
+            continue
 
-# TODO: For each test case, call plan_stops(...) with stations and trip inputs.
-for case in test_cases:
-    result = plan_stops(
+        planned_stops, fuel_remaining = result
+        print(case["label"], "-> stops:", planned_stops, "fuel at destination:", fuel_remaining)
+        assert fuel_remaining >= trip["tank_gallons"] * 0.25
+
+    multi_stop_test = plan_stops(
         stations,
-        trip["total_miles"],
-        trip["mpg"],
-        trip["tank_gallons"],
-        case["fuel_now"],
+        total_miles=236,
+        mpg=20,
+        tank_gallons=6,
+        fuel_now=6,
     )
-    if result is None:
-        print(case["label"], "-> no safe route found")
-        continue
+    print("multi-stop test ->", multi_stop_test)
+    assert multi_stop_test is not None
+    multi_stop_stops, multi_stop_fuel = multi_stop_test
+    assert multi_stop_fuel >= 6 * 0.25
 
-    planned_stops, fuel_remaining = result
-    print(case["label"], "-> stops:", planned_stops, "fuel at destination:", fuel_remaining)
-    assert fuel_remaining >= trip["tank_gallons"] * 0.25
+    max_leg_miles = (6 - 6 * 0.25) * 20
+    route_markers = [0]
+    for stop in multi_stop_stops:
+        route_markers.append(stop["mile_marker"])
+    route_markers.append(236)
 
-multi_stop_test = plan_stops(
-    stations,
-    total_miles=236,
-    mpg=20,
-    tank_gallons=6,
-    fuel_now=6,
-)
-print("multi-stop test ->", multi_stop_test)
-assert multi_stop_test is not None
-multi_stop_stops, multi_stop_fuel = multi_stop_test
-assert multi_stop_fuel >= 6 * 0.25
-
-max_leg_miles = (6 - 6 * 0.25) * 20
-route_markers = [0]
-for stop in multi_stop_stops:
-    route_markers.append(stop["mile_marker"])
-route_markers.append(236)
-
-for index in range(len(route_markers) - 1):
-    leg_miles = route_markers[index + 1] - route_markers[index]
-    assert 0 < leg_miles <= max_leg_miles
+    for index in range(len(route_markers) - 1):
+        leg_miles = route_markers[index + 1] - route_markers[index]
+        assert 0 < leg_miles <= max_leg_miles

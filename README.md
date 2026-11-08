@@ -18,7 +18,7 @@ No install needed, just open the link.
  
 SaveGas was first designed and prototyped in Figma Make, which builds a working web version of an app from a design. The Expo app in this repo is the mobile version of that prototype, with the same three screens: Home, Plan your trip, and Results.
  
-- **View the prototype:** [Open the Figma Make prototype]((https://www.figma.com/proto/gSDLyGulGkNJIAdq0xLKaM/Untitled?node-id=1-3&code-node-id=1-3&t=uEADMq72psPvHC7I-1&scaling=contain&content-scaling=responsive&page-id=0%3A1&starting-point-node-id=1%3A3))
+- **View the prototype:** [Open the Figma Make prototype](https://www.figma.com/proto/gSDLyGulGkNJIAdq0xLKaM/Untitled?node-id=1-3&code-node-id=1-3&t=uEADMq72psPvHC7I-1&scaling=contain&content-scaling=responsive&page-id=0%3A1&starting-point-node-id=1%3A3)
 - It runs in any browser, so there's nothing to install.
 ### Important: the Figma Make prototype does not do the real calculations
  

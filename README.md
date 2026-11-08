@@ -10,9 +10,19 @@ Built with React Native and Expo.
 
 ## Try the demo
 
-**Alternatively, [click on this link to view on phone](PASTE-YOUR-LINK-HERE)**
+**Alternatively, [click on this link to view on mobile](PASTE-YOUR-LINK-HERE)**
 
 No install needed, just open the link.
+
+## Figma Make prototype (visual demo only)
+ 
+SaveGas was first designed and prototyped in Figma Make, which builds a working web version of an app from a design. The Expo app in this repo is the mobile version of that prototype, with the same three screens: Home, Plan your trip, and Results.
+ 
+- **View the prototype:** [Open the Figma Make prototype]((https://www.figma.com/proto/gSDLyGulGkNJIAdq0xLKaM/Untitled?node-id=1-3&code-node-id=1-3&t=uEADMq72psPvHC7I-1&scaling=contain&content-scaling=responsive&page-id=0%3A1&starting-point-node-id=1%3A3))
+- It runs in any browser, so there's nothing to install.
+### Important: the Figma Make prototype does not do the real calculations
+ 
+The Figma Make link is meant to show **how the app looks and feels**. It is not the full working app. When you type in a trip and tap "Find the cheapest plan," it does **not** calculate anything from your input. The Results screen always shows the same sample data (the same three stops, prices, and totals), no matter what you enter.
 
 ## Run it yourself (Expo Go)
 

@@ -2,6 +2,9 @@
 
 # Fictional example stations; mile markers are measured from Orlando.
 # Prices are made up and are only here for practicing the calculator.
+from multiprocessing.resource_sharer import stop
+
+
 stations = [
     {"name": "Orlando Fuel Stop", "mile_marker": 0, "price": 3.29},
     {"name": "Kissimmee Roadside Fuel", "mile_marker": 22, "price": 3.19},
@@ -20,13 +23,14 @@ def plan_stops(stations, total_miles, mpg, tank_gallons, fuel_now):
     """Plan fuel stops; fill in the five steps from the project's "How it works"."""
     current_mile = 0
     stops = []
+    total_trip_cost = 0
     quarter_tank = tank_gallons * 0.25
 
     while current_mile < total_miles:
         distance_to_destination = total_miles - current_mile
         fuel_at_destination = fuel_now - distance_to_destination / mpg
         if fuel_at_destination >= quarter_tank:
-            return stops, fuel_at_destination
+            return stops, fuel_at_destination, total_trip_cost
 
         miles_before_reserve = (fuel_now - quarter_tank) * mpg
         reachable_stations = []
@@ -44,11 +48,24 @@ def plan_stops(stations, total_miles, mpg, tank_gallons, fuel_now):
         if fuel_on_arrival < quarter_tank:
             return None
 
-        stops.append(cheapest_station)
+        gallons_bought = tank_gallons - fuel_on_arrival
+        fuel_cost = gallons_bought * cheapest_station["price"]
+        fuel_on_departure = fuel_on_arrival + gallons_bought
+        stop = {
+            "name": cheapest_station["name"],
+            "mile_marker": cheapest_station["mile_marker"],
+            "price": cheapest_station["price"],
+            "fuel_on_arrival": fuel_on_arrival,
+            "fuel_on_departure": fuel_on_departure,
+            "gallons_bought": gallons_bought,
+            "fuel_cost": fuel_cost,
+        }
+        stops.append(stop)
+        total_trip_cost += fuel_cost
         current_mile = cheapest_station["mile_marker"]
         fuel_now = tank_gallons
 
-    return stops, fuel_now
+    return stops, fuel_now, total_trip_cost
 
 if __name__ == "__main__":
     test_cases = [
@@ -78,8 +95,16 @@ if __name__ == "__main__":
             print(case["label"], "-> no safe route found")
             continue
 
-        planned_stops, fuel_remaining = result
-        print(case["label"], "-> stops:", planned_stops, "fuel at destination:", fuel_remaining)
+        planned_stops, fuel_remaining, total_trip_cost = result
+        print(
+            case["label"],
+            "-> stops:",
+            planned_stops,
+            "fuel at destination:",
+            fuel_remaining,
+            "total fuel cost:",
+            total_trip_cost,
+        )
         assert fuel_remaining >= trip["tank_gallons"] * 0.25
 
     multi_stop_test = plan_stops(
@@ -91,7 +116,7 @@ if __name__ == "__main__":
     )
     print("multi-stop test ->", multi_stop_test)
     assert multi_stop_test is not None
-    multi_stop_stops, multi_stop_fuel = multi_stop_test
+    multi_stop_stops, multi_stop_fuel, multi_stop_cost = multi_stop_test
     assert multi_stop_fuel >= 6 * 0.25
 
     max_leg_miles = (6 - 6 * 0.25) * 20

@@ -53,6 +53,7 @@ def plan_stops(stations, total_miles, mpg, tank_gallons, fuel_now):
         fuel_on_departure = fuel_on_arrival + gallons_bought
         stop = {
             "name": cheapest_station["name"],
+            "explanation": "Cheapest reachable station while keeping the quarter-tank reserve.",
             "mile_marker": cheapest_station["mile_marker"],
             "price": cheapest_station["price"],
             "fuel_on_arrival": fuel_on_arrival,

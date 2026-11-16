@@ -9,13 +9,25 @@ export type TripData = {
   fuelType: "Regular" | "Premium";
 };
 
-export type FuelStop = {
+export type PlanStop = {
   id: number;
-  station: string;
-  location: string;
-  price: string;
-  gallons: string;
-  cost: string;
-  detour: string;
-  tag?: string;
+  name: string;
+  mile_marker: number;
+  price: number;
+  gallons: number;
+  cost: number;
+  arrive_fuel_pct: number;
+  leave_fuel_pct: number;
+  reason: string;
+};
+
+export type Plan = {
+  total_miles: number;
+  drive_minutes: number;
+  start_fuel_pct: number;
+  arrive_fuel_pct: number;
+  total_cost: number;
+  normal_cost: number;
+  saved: number;
+  stops: PlanStop[];
 };

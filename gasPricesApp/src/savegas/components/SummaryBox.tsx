@@ -5,9 +5,27 @@ type Props = {
   totalCost: number;
   savings: number;
   stopCount: number;
+  totalMiles: number;
+  driveMinutes: number;
+  arriveFuelPct: number;
 };
 
-export default function SummaryBox({ totalCost, savings, stopCount }: Props) {
+function formatDuration(minutes: number) {
+  const total = Math.round(minutes);
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  if (h === 0) return `${m} min`;
+  return m === 0 ? `${h} hr` : `${h} hr ${m} min`;
+}
+
+export default function SummaryBox({
+  totalCost,
+  savings,
+  stopCount,
+  totalMiles,
+  driveMinutes,
+  arriveFuelPct,
+}: Props) {
   const saved = savings > 0.005;
   const badge =
     stopCount === 0
@@ -34,6 +52,21 @@ export default function SummaryBox({ totalCost, savings, stopCount }: Props) {
         </View>
       </View>
       <Text style={[styles.small, styles.note]}>{note}</Text>
+
+      <View style={styles.stats}>
+        <View style={styles.stat}>
+          <Text style={styles.statValue}>{totalMiles} mi</Text>
+          <Text style={styles.small}>Distance</Text>
+        </View>
+        <View style={styles.stat}>
+          <Text style={styles.statValue}>{formatDuration(driveMinutes)}</Text>
+          <Text style={styles.small}>Drive time</Text>
+        </View>
+        <View style={styles.stat}>
+          <Text style={styles.statValue}>{arriveFuelPct}%</Text>
+          <Text style={styles.small}>Tank on arrival</Text>
+        </View>
+      </View>
     </View>
   );
 }
@@ -69,4 +102,13 @@ const styles = StyleSheet.create({
   },
   badgeText: { color: colors.white, fontSize: 10, fontWeight: "700" },
   note: { marginTop: 7, fontWeight: "400" },
+  stats: {
+    flexDirection: "row",
+    marginTop: 12,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#dbe8de",
+  },
+  stat: { flex: 1 },
+  statValue: { color: colors.ink, fontSize: 13, fontWeight: "700" },
 });

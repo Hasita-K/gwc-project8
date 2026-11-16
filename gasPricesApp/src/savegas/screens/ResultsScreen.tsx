@@ -237,6 +237,9 @@ export default function ResultsScreen({
               totalCost={plan.totalCost}
               savings={savings}
               stopCount={plan.stops.length}
+              totalMiles={ROUTE_MILES}
+              driveMinutes={driveMinutes}
+              arriveFuelPct={arrivalPercent}
             />
           ) : (
             <View style={styles.message}>

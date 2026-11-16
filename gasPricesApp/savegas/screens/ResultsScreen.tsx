@@ -13,7 +13,7 @@ import Icon from "../components/Icon";
 import PricePin from "../components/PricePin";
 import StopRow from "../components/StopRow";
 import SummaryBox from "../components/SummaryBox";
-import { ROUTE_MILES, planStops, stations } from "../calc";
+import { TOTAL_MILES, type Plan } from "../planner";
 import { colors, shadow } from "../theme";
 import type { FuelStop, TripData } from "../types";
 
@@ -82,20 +82,16 @@ function RouteMap({ w, h }: { w: number; h: number }) {
 
 export default function ResultsScreen({
   trip,
+  plan,
   onBack,
 }: {
   trip: TripData;
+  plan: Plan | null;
   onBack: () => void;
 }) {
   const insets = useSafeAreaInsets();
   const [mapSize, setMapSize] = useState({ w: 0, h: 0 });
   const [navigatingId, setNavigatingId] = useState<number | null>(null);
-
-  // run the planner on whatever the user typed in
-  const plan = useMemo(() => {
-    const fuelNow = (trip.tankSize * trip.fuelLevel) / 100;
-    return planStops(ROUTE_MILES, trip.mpg, trip.tankSize, fuelNow);
-  }, [trip.mpg, trip.tankSize, trip.fuelLevel]);
 
   const stopCards: FuelStop[] = useMemo(() => {
     if (!plan) return [];
@@ -103,10 +99,10 @@ export default function ResultsScreen({
     return plan.stops.map((s, i) => ({
       id: i + 1,
       station: s.name,
-      brand: `Mile ${s.mileMarker}`,
-      address: `Arrive with ${s.fuelOnArrival.toFixed(1)} gal, fill up to ${tank} gal`,
+      brand: `Mile ${s.mile_marker}`,
+      address: `Arrive with ${s.fuel_on_arrival.toFixed(1)} gal, fill up to ${tank} gal`,
       price: `$${s.price.toFixed(2)}`,
-      detour: `Buy ${s.gallonsBought.toFixed(1)} gal · $${s.fuelCost.toFixed(2)}`,
+      detour: `Buy ${s.gallons_bought.toFixed(1)} gal · $${s.fuel_cost.toFixed(2)}`,
     }));
   }, [plan, trip.tankSize]);
 
@@ -123,13 +119,7 @@ export default function ResultsScreen({
   const [selected, setSelected] = useState<number | null>(null);
   const activeId = selected ?? cheapestId;
 
-  const avgPrice =
-    stations.reduce((sum, st) => sum + st.price, 0) / stations.length;
-  const totalGallons = plan
-    ? plan.stops.reduce((sum, st) => sum + st.gallonsBought, 0)
-    : 0;
-  const savings = plan ? Math.max(0, totalGallons * avgPrice - plan.totalCost) : 0;
-  const driveMinutes = Math.round((ROUTE_MILES / 65) * 60); // assumes 65 mph
+  const driveMinutes = Math.round((TOTAL_MILES / 65) * 60); // assumes 65 mph
   const driveTime = `${Math.floor(driveMinutes / 60)}h ${driveMinutes % 60}m`;
 
   const onMapLayout = (e: LayoutChangeEvent) => {
@@ -180,7 +170,7 @@ export default function ResultsScreen({
 
         {plan &&
           plan.stops.map((st, i) => {
-            const [x, y] = pointAt(st.mileMarker / ROUTE_MILES);
+            const [x, y] = pointAt(st.mile_marker / TOTAL_MILES);
             const card = stopCards[i];
             return (
               <PricePin
@@ -210,10 +200,10 @@ export default function ResultsScreen({
         >
           {plan ? (
             <SummaryBox
-              distance={`${ROUTE_MILES} mi`}
+              distance={`${TOTAL_MILES} mi`}
               driveTime={driveTime}
-              fuelCost={`$${plan.totalCost.toFixed(2)}`}
-              savings={`$${savings.toFixed(2)}`}
+              fuelCost={`$${plan.total_trip_cost.toFixed(2)}`}
+              savings={plan.saved !== undefined ? `$${plan.saved.toFixed(2)}` : "--"}
             />
           ) : (
             <View style={[styles.message, styles.messageTop]}>
@@ -268,7 +258,7 @@ export default function ResultsScreen({
             Prices are estimates and may change before you arrive.
           </Text>
           <Text style={styles.footnote}>
-            Demo route: Orlando to Miami ({ROUTE_MILES} mi) with sample
+            Demo route: Orlando to Miami ({TOTAL_MILES} mi) with sample
             prices. Other routes are coming soon.
           </Text>
         </ScrollView>

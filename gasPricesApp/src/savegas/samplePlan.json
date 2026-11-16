@@ -1,1 +1,44 @@
-
+{
+  "total_miles": 236,
+  "drive_minutes": 240,
+  "start_fuel_pct": 50,
+  "arrive_fuel_pct": 90,
+  "total_cost": 63.89,
+  "normal_cost": 69.4,
+  "saved": 5.51,
+  "stops": [
+    {
+      "id": 1,
+      "name": "Fort Drum Travel Stop",
+      "mile_marker": 89,
+      "price": 3.09,
+      "gallons": 8.97,
+      "cost": 27.71,
+      "arrive_fuel_pct": 25,
+      "leave_fuel_pct": 100,
+      "reason": "Cheapest station you can reach before 1/4 tank"
+    },
+    {
+      "id": 2,
+      "name": "Okeechobee Fuel Stop",
+      "mile_marker": 150,
+      "price": 3.15,
+      "gallons": 6.5,
+      "cost": 20.48,
+      "arrive_fuel_pct": 46,
+      "leave_fuel_pct": 100,
+      "reason": "Best price in range before the next long stretch"
+    },
+    {
+      "id": 3,
+      "name": "Pembroke Gas",
+      "mile_marker": 205,
+      "price": 3.02,
+      "gallons": 5.2,
+      "cost": 15.7,
+      "arrive_fuel_pct": 57,
+      "leave_fuel_pct": 100,
+      "reason": "Lowest price in the last 100 miles"
+    }
+  ]
+}

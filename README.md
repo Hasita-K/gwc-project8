@@ -38,7 +38,7 @@ The Figma Make link is meant to show **how the app looks and feels**. It is not 
 
    ```
    git clone https://github.com/Hasita-K/gwc-project8.git
-   cd gwc-project8/frontend
+   cd gwc-project8/gasPricesApp
    ```
 
 2. Install everything the app needs:
@@ -67,7 +67,8 @@ The app will open in Expo Go on your phone.
 
 ## Project structure
 
-- `frontend/app/index.tsx` loads the app
-- `frontend/savegas/screens` has the three screens (Home, Trip form, Results)
-- `frontend/savegas/components` has the reusable pieces (buttons, inputs, price pins)
+- `gasPricesApp/app/index.tsx` loads the app
+- `gasPricesApp/savegas/screens` has the three screens (Home, Trip form, Results)
+- `gasPricesApp/savegas/components` has the reusable pieces (buttons, inputs, price pins)
+- `gasPricesApp/savegas/calc.ts` is the TypeScript version of the gas stop planner
 - `backend/` and `main.py` are the Python side of the project

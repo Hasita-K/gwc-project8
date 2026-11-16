@@ -111,13 +111,16 @@ export default function ResultsScreen({
       price: `$${s.price.toFixed(2)}`,
       gallons: s.gallonsBought.toFixed(1),
       cost: `$${s.fuelCost.toFixed(2)}`,
-      detour: `Mile ${s.mileMarker} of ${ROUTE_MILES} · arrive with ${s.fuelOnArrival.toFixed(1)} gal`,
+      detour: `Mile ${s.mileMarker} of ${ROUTE_MILES}`,
+      arriveFuel: `${Math.round((s.fuelOnArrival / trip.tankSize) * 100)}%`,
+      leaveFuel: `${Math.round((s.fuelOnDeparture / trip.tankSize) * 100)}%`,
+      reason: "Cheapest station you can reach before dropping below 1/4 tank",
       tag:
         plan.stops.length > 1 && s.price === cheapest
           ? "Cheapest stop on your route"
           : undefined,
     }));
-  }, [plan]);
+  }, [plan, trip.tankSize]);
 
   const avgPrice =
     stations.reduce((sum, st) => sum + st.price, 0) / stations.length;
@@ -454,6 +457,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 6,
+    borderWidth: 0,
     borderRadius: 12,
     backgroundColor: colors.primarySoft,
   },

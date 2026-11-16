@@ -16,46 +16,43 @@ import PricePin from "../components/PricePin";
 import PrimaryButton from "../components/PrimaryButton";
 import StopRow from "../components/StopRow";
 import SummaryBox from "../components/SummaryBox";
+import samplePlan from "../samplePlan.json";
 import { colors, shadow } from "../theme";
-import type { FuelStop, TripData } from "../types";
+import type { Plan, TripData } from "../types";
 
-const stops: FuelStop[] = [
-  {
-    id: 1,
-    station: "Wawa",
-    location: "Orlando",
-    price: "$3.09",
-    gallons: "6.2",
-    cost: "$19.16",
-    detour: "0.4 mi off route",
-    tag: "Top off before you leave",
-  },
-  {
-    id: 2,
-    station: "Shell",
-    location: "Fort Pierce",
-    price: "$3.29",
-    gallons: "3.1",
-    cost: "$10.20",
-    detour: "0.7 mi off route",
-  },
-  {
-    id: 3,
-    station: "Circle K",
-    location: "Pompano Beach",
-    price: "$3.35",
-    gallons: "2.8",
-    cost: "$9.38",
-    detour: "0.3 mi off route",
-  },
+// The route line on the drawn map, in percentage coordinates
+const ROUTE: [number, number][] = [
+  [11.5, 24], [25, 27], [34, 38], [42, 46], [52, 51],
+  [60, 60], [66, 66], [72, 72], [79, 84], [81.5, 90],
 ];
 
-// pin positions on the map, as percentages of the map area
-const pinPositions: { left: `${number}%`; top: `${number}%` }[] = [
-  { left: "25%", top: "27%" },
-  { left: "52%", top: "51%" },
-  { left: "72%", top: "72%" },
-];
+// Finds a point on the route line. fraction 0 = start, 1 = destination.
+function pointAlongRoute(fraction: number): { x: number; y: number } {
+  const f = Math.max(0, Math.min(1, fraction));
+  const lengths: number[] = [];
+  let total = 0;
+  for (let i = 1; i < ROUTE.length; i++) {
+    const d = Math.hypot(
+      ROUTE[i][0] - ROUTE[i - 1][0],
+      ROUTE[i][1] - ROUTE[i - 1][1]
+    );
+    lengths.push(d);
+    total += d;
+  }
+  let target = f * total;
+  for (let i = 0; i < lengths.length; i++) {
+    if (target <= lengths[i]) {
+      const t = lengths[i] === 0 ? 0 : target / lengths[i];
+      return {
+        x: ROUTE[i][0] + (ROUTE[i + 1][0] - ROUTE[i][0]) * t,
+        y: ROUTE[i][1] + (ROUTE[i + 1][1] - ROUTE[i][1]) * t,
+      };
+    }
+    target -= lengths[i];
+  }
+  const last = ROUTE[ROUTE.length - 1];
+  return { x: last[0], y: last[1] };
+}
 
 // Simple drawn "map" (water, parks, roads, route) in percentage coordinates
 function RouteMap({ w, h }: { w: number; h: number }) {
@@ -67,11 +64,7 @@ function RouteMap({ w, h }: { w: number; h: number }) {
     [22, 8, 72, 108],
     [-5, 78, 105, 62],
   ];
-  const route: [number, number][] = [
-    [11.5, 24], [25, 27], [34, 38], [42, 46], [52, 51],
-    [60, 60], [66, 66], [72, 72], [79, 84], [81.5, 90],
-  ];
-  const points = route.map(([px, py]) => `${x(px)},${y(py)}`).join(" ");
+  const points = ROUTE.map(([px, py]) => `${x(px)},${y(py)}`).join(" ");
 
   return (
     <Svg width={w} height={h} style={StyleSheet.absoluteFill}>
@@ -99,14 +92,27 @@ function RouteMap({ w, h }: { w: number; h: number }) {
 export default function ResultsScreen({
   trip,
   onBack,
+  plan = samplePlan,
 }: {
   trip: TripData;
   onBack: () => void;
+  plan?: Plan;
 }) {
   const insets = useSafeAreaInsets();
   const { height: winH } = useWindowDimensions();
 
-  const [selected, setSelected] = useState(1);
+  const stops = plan.stops;
+  const stopCount = stops.length;
+  const cheapestId =
+    stopCount > 0
+      ? stops.reduce((a, b) => (b.price < a.price ? b : a)).id
+      : null;
+  const stopsSub =
+    stopCount === 0
+      ? "No stops needed on this trip"
+      : `${stopCount} smart stop${stopCount === 1 ? "" : "s"} along your route`;
+
+  const [selected, setSelected] = useState<number>(stops[0]?.id ?? 0);
   const [navigationStarted, setNavigationStarted] = useState(false);
   const [mapSize, setMapSize] = useState({ w: 0, h: 0 });
 
@@ -176,18 +182,23 @@ export default function ResultsScreen({
           </Text>
         </View>
 
-        {stops.map((s, i) => (
-          <PricePin
-            key={s.id}
-            number={s.id}
-            price={s.price}
-            cheapest={s.id === 1}
-            selected={selected === s.id}
-            left={pinPositions[i].left}
-            top={pinPositions[i].top}
-            onPress={() => setSelected(s.id)}
-          />
-        ))}
+        {stops.map((s) => {
+          const fraction =
+            plan.total_miles > 0 ? s.mile_marker / plan.total_miles : 0;
+          const pt = pointAlongRoute(fraction);
+          return (
+            <PricePin
+              key={s.id}
+              number={s.id}
+              price={`$${s.price.toFixed(2)}`}
+              cheapest={s.id === cheapestId}
+              selected={selected === s.id}
+              left={`${pt.x}%` as `${number}%`}
+              top={`${pt.y}%` as `${number}%`}
+              onPress={() => setSelected(s.id)}
+            />
+          );
+        })}
       </View>
 
       {/* BOTTOM SHEET */}
@@ -201,12 +212,19 @@ export default function ResultsScreen({
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 20 }}
           showsVerticalScrollIndicator={false}
         >
-          <SummaryBox />
+          <SummaryBox
+            totalCost={plan.total_cost}
+            savings={plan.saved}
+            stopCount={stopCount}
+            totalMiles={plan.total_miles}
+            driveMinutes={plan.drive_minutes}
+            arriveFuelPct={plan.arrive_fuel_pct}
+          />
 
           <View style={styles.stopsHeading}>
             <View>
               <Text style={styles.stopsTitle}>Your fuel stops</Text>
-              <Text style={styles.stopsSub}>3 smart stops along your route</Text>
+              <Text style={styles.stopsSub}>{stopsSub}</Text>
             </View>
             <Icon name="route" size={21} color={colors.primary} />
           </View>
@@ -216,28 +234,11 @@ export default function ResultsScreen({
               <StopRow
                 key={stop.id}
                 stop={stop}
-                cheapest={stop.id === 1}
+                cheapest={stop.id === cheapestId}
                 selected={selected === stop.id}
                 onPress={() => setSelected(stop.id)}
               />
             ))}
-          </View>
-
-          <View style={styles.details}>
-            <View style={styles.detailCell}>
-              <Text style={styles.detailBig}>235 mi</Text>
-              <Text style={styles.detailSmall}>Distance</Text>
-            </View>
-            <View style={styles.divider} />
-            <View style={styles.detailCell}>
-              <Text style={styles.detailBig}>3h 40m</Text>
-              <Text style={styles.detailSmall}>Drive time</Text>
-            </View>
-            <View style={styles.divider} />
-            <View style={styles.detailCell}>
-              <Text style={styles.detailBig}>25% tank</Text>
-              <Text style={styles.detailSmall}>On arrival</Text>
-            </View>
           </View>
         </ScrollView>
 
@@ -346,21 +347,6 @@ const styles = StyleSheet.create({
   },
   stopsTitle: { color: colors.ink, fontSize: 17, fontWeight: "800", letterSpacing: -0.4 },
   stopsSub: { marginTop: 3, color: colors.muted, fontSize: 10 },
-  details: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 12,
-    borderWidth: 1,
-    borderColor: colors.line,
-    borderRadius: 16,
-    backgroundColor: "rgba(255,255,255,0.65)",
-    paddingVertical: 11,
-    paddingHorizontal: 8,
-  },
-  detailCell: { flex: 1, alignItems: "center" },
-  detailBig: { color: colors.primary, fontSize: 11, fontWeight: "700" },
-  detailSmall: { marginTop: 2, color: colors.muted, fontSize: 8 },
-  divider: { width: 1, height: 25, backgroundColor: colors.line },
   actions: {
     gap: 7,
     paddingTop: 10,

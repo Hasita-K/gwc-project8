@@ -18,4 +18,7 @@ export type FuelStop = {
   cost: string;
   detour: string;
   tag?: string;
+  arriveFuel?: string;
+  leaveFuel?: string;
+  reason?: string;
 };

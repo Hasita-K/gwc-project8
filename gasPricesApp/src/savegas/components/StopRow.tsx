@@ -1,15 +1,13 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { colors } from "../theme";
-import type { PlanStop } from "../types";
+import type { FuelStop } from "../types";
 
 type Props = {
-  stop: PlanStop;
+  stop: FuelStop;
   selected: boolean;
   cheapest?: boolean;
   onPress: () => void;
 };
-
-const money = (n: number) => `$${n.toFixed(2)}`;
 
 export default function StopRow({ stop, selected, cheapest, onPress }: Props) {
   return (
@@ -23,24 +21,36 @@ export default function StopRow({ stop, selected, cheapest, onPress }: Props) {
 
       <View style={styles.main}>
         <Text numberOfLines={1} style={styles.title}>
-          <Text style={styles.station}>{stop.name}</Text>
-          <Text style={styles.location}> · Mile {stop.mile_marker}</Text>
+          <Text style={styles.station}>{stop.station}</Text>
+          <Text style={styles.location}> · {stop.location}</Text>
         </Text>
-        <Text style={styles.meta}>
-          Arrive {stop.arrive_fuel_pct}% → leave {stop.leave_fuel_pct}%
-        </Text>
-        <Text numberOfLines={2} style={styles.reason}>
-          {stop.reason}
-        </Text>
+        <Text style={styles.meta}>{stop.detour}</Text>
+        {stop.arriveFuel && stop.leaveFuel && (
+          <Text style={styles.fuel}>
+            Tank: {stop.arriveFuel} on arrival → {stop.leaveFuel} after filling
+          </Text>
+        )}
+        {stop.reason && (
+          <Text numberOfLines={2} style={styles.reason}>
+            {stop.reason}
+          </Text>
+        )}
+        {stop.tag && (
+          <View style={styles.tag}>
+            <Text numberOfLines={1} style={styles.tagText}>
+              {stop.tag}
+            </Text>
+          </View>
+        )}
       </View>
 
       <View style={styles.numbers}>
         <Text style={styles.price}>
-          {money(stop.price)}
+          {stop.price}
           <Text style={styles.perGal}>/gal</Text>
         </Text>
         <Text style={styles.sub}>
-          {stop.gallons.toFixed(1)} gal · {money(stop.cost)}
+          {stop.gallons} gal · {stop.cost}
         </Text>
       </View>
     </Pressable>
@@ -82,7 +92,17 @@ const styles = StyleSheet.create({
   station: { fontSize: 12, fontWeight: "700", color: colors.ink },
   location: { color: colors.muted },
   meta: { marginTop: 3, color: colors.muted, fontSize: 9 },
-  reason: { marginTop: 3, color: "#bd5f31", fontSize: 9, fontWeight: "600" },
+  fuel: { marginTop: 2, color: colors.muted, fontSize: 9 },
+  reason: { marginTop: 3, color: colors.muted, fontSize: 9, fontStyle: "italic" },
+  tag: {
+    alignSelf: "flex-start",
+    marginTop: 4,
+    borderRadius: 999,
+    backgroundColor: colors.orangeSoft,
+    paddingVertical: 3,
+    paddingHorizontal: 6,
+  },
+  tagText: { color: "#bd5f31", fontSize: 8, fontWeight: "700" },
   numbers: { alignItems: "flex-end" },
   price: { color: colors.primary, fontSize: 13, fontWeight: "700" },
   perGal: { color: colors.muted, fontSize: 8, fontWeight: "500" },

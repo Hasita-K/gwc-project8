@@ -8,12 +8,6 @@ SaveGas is a mobile app that helps you find the cheapest fuel stops along your t
 
 Built with React Native and Expo.
 
-## Try the demo
-
-**Alternatively, [click on this link to view on mobile](PASTE-YOUR-LINK-HERE)**
-
-No install needed, just open the link.
-
 ## Figma Make prototype (visual demo only)
  
 SaveGas was first designed and prototyped in Figma Make, which builds a working web version of an app from a design. The Expo app in this repo is the mobile version of that prototype, with the same three screens: Home, Plan your trip, and Results.
